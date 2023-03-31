@@ -7,7 +7,7 @@ environment:
   sdk: ">=2.17.0 <3.0.0"
 
 dependencies:
-  analyzer: ^5.7.1 
+  analyzer: ^5.7.0 
   blockfrost: ^1.1.0-dev.1
   # blockfrost:
   #   path: ../blockfrost_api
