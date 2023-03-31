@@ -12,7 +12,7 @@ dependencies:
   # blockfrost:
   #   path: ../blockfrost_api
   bip32_ed25519: 0.5.0
-  pinenacl: 0.5.1
+  pinenacl: ^0.5.0 
   crypto: ^3.0.2
   base_x: ^2.0.0
   built_collection: ^5.1.0
@@ -22,7 +22,7 @@ dependencies:
   convert: ^3.0.0
   dio: ^4.0.3
   hex: ^0.2.0
-  intl: ^0.18.0
+  intl:  ^0.17.0
   json_annotation: ^4.5.0
   logging: ^1.0.2
   oxidized: ^5.1.0
