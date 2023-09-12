@@ -33,11 +33,11 @@ Future<Result<T, String>> dioCall<T extends Object>(
       onSuccess(response.data!);
     }
     return Ok(response.data!);
-  } on DioError catch (dioError) {
+  } on DioException catch (dioError) {
     //logger.info("DioError: ${dioError.message}");
     if (dioError.error is Exception) {
       if (onError != null) {
-        onError(exception: dioError.error);
+        onError(exception: dioError);
       }
       return const Err('internet not available');
     }
@@ -63,9 +63,10 @@ Future<Result<T, String>> dioCall<T extends Object>(
 ///
 /// blockfrost error codes to user readable messages
 ///
-String translateErrorMessage({required DioError dioError, String? subject}) {
+String translateErrorMessage(
+    {required DioException dioError, String? subject}) {
   if (dioError.response == null) {
-    return dioError.message;
+    return dioError.message!;
   }
   final prefix = isBlank(subject) ? '' : "$subject ";
   var suffix = '';
