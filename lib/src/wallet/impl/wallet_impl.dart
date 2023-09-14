@@ -149,6 +149,54 @@ class WalletImpl extends ReadOnlyWalletImpl implements Wallet {
     return txResult;
   }
 
+  Future<Result<BcTransaction, String>> buildSpendTransactionWithoutChange({
+    required AbstractAddress toAddress,
+    required Coin lovelace,
+    int ttl = 0,
+    Coin? fee,
+  }) async {
+    if (lovelace > balance) {
+      return const Err('insufficient balance');
+    }
+    if (toAddress.addressType != AddressType.base) {
+      return const Err('only base shelley addresses currently supported');
+    }
+    if (toAddress is ShelleyAddress) {
+      if (toAddress.hrp != 'addr' && toAddress.hrp != 'addr_test') {
+        return const Err(
+            "not a valid shelley external addresses, expecting 'addr' or 'addr_test' prefix");
+      }
+    }
+    //coin selection:
+    //TODO handle edge-case where fee adjustment requires input recalculation.
+    Coin maxFeeGuess = BigInt.from(200000); //0.2 ADA
+    final inputsResult = await coinSelectionFunction(
+      unspentInputsAvailable: unspentTransactions,
+      spendRequest:
+          FlatMultiAsset(fee: maxFeeGuess, assets: {lovelaceHex: lovelace}),
+      ownedAddresses: addresses.toSet(),
+    );
+    if (inputsResult.isErr()) return Err(inputsResult.unwrapErr().message);
+    //use builder to build ShelleyTransaction
+    //final pair = hdWallet.accountKeys();
+    final builder = TxBuilder()
+      ..inputs(inputsResult.unwrap().inputs)
+      ..spendRequest(FlatMultiAsset(fee: fee, assets: {lovelaceHex: lovelace}))
+      //..value(BcValue(coin: lovelace, multiAssets: []))
+      ..toAddress(toAddress)
+      ..wallet(this) //contains sign key & verify key
+      ..blockchainAdapter(blockchainAdapter)
+      ..changeAddress(firstUnusedChangeAddress)
+      ..ttl(ttl);
+    // ..fee(fee);
+    print(firstUnusedChangeAddress.address);
+    final txResult = await builder.buildAndSign();
+    if (txResult.isOk() && !txResult.unwrap().verify) {
+      return const Err('transaction validation failed');
+    }
+    return txResult;
+  }
+
   @override
   bool get readOnly => false;
 }
