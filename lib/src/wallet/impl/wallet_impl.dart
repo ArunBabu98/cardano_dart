@@ -142,6 +142,7 @@ class WalletImpl extends ReadOnlyWalletImpl implements Wallet {
       ..changeAddress(firstUnusedChangeAddress)
       ..ttl(ttl);
     // ..fee(fee);
+    print(firstUnusedChangeAddress.address);
     final txResult = await builder.buildAndSign();
     if (txResult.isOk() && !txResult.unwrap().verify) {
       return const Err('transaction validation failed');
